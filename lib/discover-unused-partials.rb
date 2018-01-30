@@ -101,7 +101,7 @@ module DiscoverUnusedPartials
                   full_path = "#{file.split('/')[0...-1].join('/')}/_#{match}"
                 end
               end
-              partials << check_extension_path(full_path)
+              partials += check_extension_path(full_path)
             elsif line =~ /#@@partial|#@@render["']/
               if @options["dynamic"] && @options["dynamic"][file]
                 partials += @options["dynamic"][file]
@@ -119,7 +119,11 @@ module DiscoverUnusedPartials
 
     EXT = %w(.html.erb .text.erb .pdf.erb .erb .html.haml .text.haml .haml .rhtml .html.slim .slim .html.inky-haml .html)
     def check_extension_path(file)
-      "#{file}#{EXT.find{ |e| File.exists? file + e }}"
+      EXT.map do |e|
+        file + e
+      end.select do |file_with_extension|
+        File.exists?(file_with_extension)
+      end
     end
 
     def each_file(root, &block)
